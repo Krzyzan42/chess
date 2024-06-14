@@ -1,0 +1,31 @@
+QMainWindow {
+    background-color: #222;
+    color: white;
+}
+
+QLabel {
+    color: white;
+}
+
+QPushButton {
+    background-color: #333;
+    color: #ddd;
+    font-size: 25px;
+    text-align: left;
+}
+
+MenuButton {
+    padding: 20px;
+    margin: 0px;
+    border: none;
+    border-bottom: 1px solid #888;
+}
+
+MenuButton:hover {
+    background-color: #555;
+}
+
+MenuButton:disabled {
+    background-color: #353535;
+    color: #aaa;
+}
