@@ -2,6 +2,7 @@ import asyncio
 import pickle
 from . import SocketError
 from networking.common.message import Message
+import logging
 
 class AsyncioMsgSocket:
     _reader :asyncio.StreamReader = None
@@ -30,6 +31,7 @@ class AsyncioMsgSocket:
             payload_size = int.from_bytes(data, 'big')
             msg_data = await self._reader.readexactly(payload_size)
             msg :Message = pickle.loads(msg_data)
+            logging.debug(f'Read {msg}')
             return msg
         except Exception as e:
             raise SocketError('Failed to read')
@@ -43,6 +45,7 @@ class AsyncioMsgSocket:
             payload_size = len(msg_data)
             data_sent = int.to_bytes(payload_size, 4, 'big') + msg_data 
             self._writer.write(data_sent)
+            logging.debug(f'Sent {message}')
         except Exception as e:
             raise SocketError('Failed to write')
 

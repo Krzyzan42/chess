@@ -57,7 +57,7 @@ class LoginManager:
             msg.owner.send(Response(
                 msg.id,
                 False,
-                error_msg='User not found or invalid password', 
+                'User not found or invalid password', 
             ))
         else:
             self.logged_users[msg.owner] = user
@@ -73,13 +73,13 @@ class LoginManager:
             msg.owner.send(Response(
                 msg.id,
                 False,
-                error_str='User with that username already exists'
+                'User with that username already exists'
             ))
         elif self.is_logged(msg.owner):
             msg.owner.send(Response(
                 msg.id,
                 False,
-                error_str='Cant create an account while logged in'
+                'Cant create an account while logged in'
             ))
         else:
             user = User.create(

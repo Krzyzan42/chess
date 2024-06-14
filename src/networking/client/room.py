@@ -15,6 +15,7 @@ class Room(QObject):
     def __init__(self, connection :ClientConnection) -> None:
         super().__init__()
         self._conn = connection
+        self.current_room = None
 
     async def create_room(self, name :str) -> Response:
         return await self._conn.send_request(RoomCreateRequest(name))
@@ -29,9 +30,10 @@ class Room(QObject):
         return await self._conn.send_request(StartGameRequest())
 
     async def list_rooms(self) -> list[RoomInfo]:
-        return await self._conn.send_request(ListRoomsRequest())
+        result :RoomListResponse = await self._conn.send_request(ListRoomsRequest())
+        return result.rooms
 
-    def process_message(self, msg :Message):
+    def msg_recieved(self, msg :Message):
         if msg.msg_type != MSG_ROOM_UPDATED:
             return
         msg :RoomUpdatedMsg = msg

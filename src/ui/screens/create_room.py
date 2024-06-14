@@ -3,11 +3,14 @@ from PySide6.QtWidgets import *
 from networking.common import *
 from networking.client import *
 from ui import *
+import asyncio
 
 class CreateRoomScreen(QWidget):
+    client :Client
+
     def __init__(self):
         super().__init__()
-        Client.instance.msg_recieved.connect(self.process_msg)
+        self.client = Client.instance
         self.setup_widgets()
 
     def setup_widgets(self):
@@ -29,28 +32,24 @@ class CreateRoomScreen(QWidget):
         self.setLayout(layout)
 
         cancel_btn.pressed.connect(self._cancel_pressed)
-        create_btn.pressed.connect(self._create_room_pressed)
+        create_btn.pressed.connect(lambda: asyncio.ensure_future(self._create_room()))
 
     def _cancel_pressed(self):
         from ui import OnlineMenu
         ScreenManager.instance.set_screen(OnlineMenu())
     
-    def _create_room_pressed(self):
+    async def _create_room(self):
         name = self.room_name_input.text()
-        Client.instance.send_msg(RoomCreateRequest(name))
-        self._loading_dialog = LoadingDialog()
-        self._loading_dialog.show()
+        _loading_dialog = LoadingDialog()
+        _loading_dialog.show()
+        result = await self.client.room.create_room(name)
+        _loading_dialog.accept()
 
-    def process_msg(self, msg :Message):
-        if msg.msg_type == MSG_ROOM_JOIN:
-            self.process_room_join_msg(msg)
+        if result.success:
+            self.go_to_room_screen()
+        else:
+            ErrorDialog(self,result.error_str).exec()
 
-    def process_room_join_msg(self, msg :RoomJoinMsg):
-        print(msg)
-        self._loading_dialog.close()
-        if msg.success:
-            self.go_to_room_screen(msg.room_info)
-
-    def go_to_room_screen(self, room_info):
+    def go_to_room_screen(self):
         from ui import RoomScreen
-        ScreenManager.instance.set_screen(RoomScreen(room_info))
+        ScreenManager.instance.set_screen(RoomScreen())

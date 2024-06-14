@@ -5,6 +5,9 @@ with open('port', 'w') as file:
 from networking.server.server import Server
 import asyncio
 from PySide6 import QtAsyncio
+import logging
+
+logging.getLogger().setLevel(logging.DEBUG)
 
 async def main():
     server = Server()

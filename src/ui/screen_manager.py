@@ -5,6 +5,7 @@ class ScreenManager(QObject):
     screen_changed = Signal(QWidget)
     current_screen :QWidget
     instance :'ScreenManager' = None
+    window :QWidget
 
     def __init__(self):
         super().__init__()

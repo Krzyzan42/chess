@@ -13,6 +13,7 @@ class Window(QMainWindow):
         self.setStyleSheet(self.get_style())
 
         scr_mng = ScreenManager.instance
+        scr_mng.window = self
 
         scr_mng.screen_changed.connect(self.change_screen)
         self.setCentralWidget(scr_mng.current_screen)

@@ -85,10 +85,10 @@ class RoomManager:
         for room in self.rooms.values():
             room_infos.append(room.to_room_info())
 
-        msg.owner.send(RoomListResponse(msg.id, room_infos))
+        msg.owner.send(RoomListResponse(room_infos, msg.id))
 
     def _process_join_room_request(self, msg :JoinRoomRequest):
-        room = self.rooms.get(id, None)
+        room = self.rooms.get(msg.room_id, None)
         if not self.login_mng.is_logged(msg.owner):
             msg.owner.send(Response(msg.id, False, 'You need to be logged in to join a room'))
         elif not room:
@@ -102,18 +102,17 @@ class RoomManager:
             room.guest = msg.owner
             room.guest_username = user.username
 
-            updateMsg = RoomUpdatedMsg(room.to_room_info(), someone_joined_msg=user.username)
-            room.host.send(updateMsg)
-            room.guest.send(Response(msg.id, True))
+            room.host.send(RoomUpdatedMsg(room.to_room_info(), someone_joined_msg=user.username))
             room.guest.send(RoomUpdatedMsg(room.to_room_info(), joined=True))
+            msg.owner.send(Response(msg.id, True))
 
     def _process_leave_room_request(self, msg :LeaveRoomRequest):
         room = self._get_conn_room(msg.owner)
         if room is None:
             msg.owner.send(Response(msg.id, False, 'Room doesnt exist'))
         else:
-            msg.owner.send(Response(msg.id, True))
             self._remove_conn_from_room(room, msg.owner)
+            msg.owner.send(Response(msg.id, True))
     
     def _remove_conn_from_room(self, room :Room, conn :ServerConnection):
         if room.guest == conn:
@@ -121,9 +120,11 @@ class RoomManager:
             room.guest = None
             room.guest_username = None
             room.host.send(RoomUpdatedMsg(room.to_room_info(), someone_left_msg=user_leaving))
+            conn.send(RoomUpdatedMsg(None))
         elif room.host == conn:
             if room.guest:
                 room.guest.send(RoomUpdatedMsg(None, kick_msg='Host left the room'))
+            room.host.send(RoomUpdatedMsg(None))
             self.rooms.pop(room.id)
             print(f'Removing {room}')
         else:

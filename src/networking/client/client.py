@@ -26,7 +26,7 @@ class Client(QObject):
         Client.instance = self
 
         self.msg_recieved.connect(self.auth.msg_recieved)
-        # self.msg_recieved.connect(self.room.msg_recieved)
+        self.msg_recieved.connect(self.room.msg_recieved)
 
     @staticmethod
     def setup():

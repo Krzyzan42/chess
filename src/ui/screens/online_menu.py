@@ -28,12 +28,17 @@ class OnlineMenu(QWidget):
         self.logout_btn = MenuButton('Logout')
         self.back_btn = MenuButton('Exit')
 
+        self.login_1 = MenuButton('Login as asdf')
+        self.login_2 = MenuButton('Login as asdfg')
+
         left_bar.addWidget(self.join_btn)
         left_bar.addWidget(self.create_room_btn)
         left_bar.addWidget(self.login_btn)
         left_bar.addWidget(self.register_btn)
         left_bar.addWidget(self.logout_btn)
         left_bar.addWidget(self.back_btn)
+        left_bar.addWidget(self.login_1)
+        left_bar.addWidget(self.login_2)
         left_bar.addStretch(1)
         left_bar.setSpacing(0)
         left_bar.setContentsMargins(0,0,0,0)
@@ -60,6 +65,8 @@ class OnlineMenu(QWidget):
         self.login_btn.pressed.connect(self._login_pressed)
         self.register_btn.pressed.connect(self._register_pressed)
         self.logout_btn.pressed.connect(lambda: asyncio.ensure_future(self._logout_pressed()))
+        self.login_1.pressed.connect(lambda: asyncio.ensure_future(self._login_1()))
+        self.login_2.pressed.connect(lambda: asyncio.ensure_future(self._login_2()))
 
     def _update_btn_visibility(self):
         logged = self.client.auth.is_authenticated
@@ -97,4 +104,16 @@ class OnlineMenu(QWidget):
         dialog = LoadingDialog()
         dialog.show()
         await self.client.auth.logout()
+        dialog.accept()
+
+    async def _login_1(self):
+        dialog = LoadingDialog()
+        dialog.show()
+        await self.client.auth.login('asdf', 'asdf')
+        dialog.accept()
+
+    async def _login_2(self):
+        dialog = LoadingDialog()
+        dialog.show()
+        await self.client.auth.login('asdfg', 'asdfg')
         dialog.accept()
