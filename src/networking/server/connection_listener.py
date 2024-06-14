@@ -2,7 +2,7 @@ import socket
 import networking.settings as settings
 from queue import Queue
 from threading import Thread
-from networking.common import Connection
+# from networking.common import Connection
 from networking import settings
 
 class ConnectionListener(Thread):
@@ -25,8 +25,8 @@ class ConnectionListener(Thread):
         self.listener.listen(5)
         while True:
             sock, addr = self.listener.accept()
-            connection = Connection(sock, in_queue=self.in_queue)
-            connection.address = addr
-            self.new_connections.put(connection)
+            # connection = Connection(sock, in_queue=self.in_queue)
+            # connection.address = addr
+            # self.new_connections.put(connection)
 
             print(f'New connection accepted from {addr}')

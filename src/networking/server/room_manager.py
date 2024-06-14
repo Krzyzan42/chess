@@ -8,9 +8,9 @@ from . import LoginManager
 class Room:
     id :int
     name :str
-    host :Connection
+    host :ServerConnection
     host_username :str
-    guest :Connection = None
+    guest :ServerConnection = None
     guest_username :str = None
 
     def to_room_info(self) -> RoomInfo:
@@ -34,91 +34,103 @@ class RoomManager:
     def process_message(self, msg :Message):
         processors = {
             MSG_ROOM_CREATE_REQUEST: self._process_room_create_request,
-            MSG_LIST_ROOMS_REQUEST: self._process_room_list_request,
+            MSG_ROOM_LIST_REQUEST: self._process_room_list_request,
             MSG_JOIN_ROOM_REQUEST: self._process_join_room_request,
             MSG_LEAVE_ROOM_REQUEST: self._process_leave_room_request,
-            MSG_ROOM_INFO_REQUEST: self._process_room_info_request,
         }
         if msg.msg_type in processors:
             processors[msg.msg_type](msg)
 
     def update(self):
-        pass
+        conns_to_remove = [] 
+        for room in self.rooms.values():
+            c1 = room.host
+            c2 = room.guest
+            if not c1.is_alive() or not self.login_mng.is_logged(c1):
+                conns_to_remove.append(c1)
+            elif c2:
+                if not c2.is_alive() or not self.login_mng.is_logged(c2): 
+                    conns_to_remove.append(c2)
 
-    def cleanup(self, dead_conns :list[Connection]):
-        for conn in dead_conns:
+        for conn in conns_to_remove:
             room = self._get_conn_room(conn)
-            if room:
+            if room is not None:
                 self._remove_conn_from_room(room, conn)
 
     def _process_room_create_request(self, msg :RoomCreateRequest):
         if not self.login_mng.is_logged(msg.owner):
-            msg.owner.out_queue.put(RoomJoinMsg(False, error_str='You need to log in to create a room!'))
-            return
-        user = self.login_mng.get_user(msg.owner)
-
-        room = Room(
-            id = random.randint(0, 100000),
-            name = msg.room_name,
-            host = msg.owner,
-            host_username = user.username
-        )
-        self.rooms[room.id] = room
-        msg.owner.out_queue.put(RoomJoinMsg(True, room_info=room.to_room_info()))
-        print(f'Room {msg.room_name} created. ID: {room.id}')
+            msg.owner.send(Response(msg.id, False, 'You need to log in to create a room!'))
+        elif len(msg.room_name) < 3:
+            msg.owner.send(Response(msg.id, False, 'Room name needs to have at least 3 letters'))
+        elif self._room_exists(msg.room_name):
+            msg.owner.send(Response(msg.id, False, 'Room with that name already exists'))
+        else:
+            user = self.login_mng.get_user(msg.owner)
+            room = Room(
+                id = random.randint(0, 100000),
+                name = msg.room_name,
+                host = msg.owner,
+                host_username = user.username
+            )
+            self.rooms[room.id] = room
+            msg.owner.send(Response(msg.id, True))
+            msg.owner.send(RoomUpdatedMsg(room.to_room_info(), joined=True))
+            print(f'Room {msg.room_name} created. ID: {room.id}')
+    
+    def _room_exists(self, name):
+        return name in [room.name for room in self.rooms.values()]
 
     def _process_room_list_request(self, msg :Message):
         room_infos = []
         for room in self.rooms.values():
             room_infos.append(room.to_room_info())
 
-        msg.owner.out_queue.put(RoomListMsg(room_infos))
+        msg.owner.send(RoomListResponse(msg.id, room_infos))
 
     def _process_join_room_request(self, msg :JoinRoomRequest):
+        room = self.rooms.get(id, None)
         if not self.login_mng.is_logged(msg.owner):
-            msg.owner.out_queue.put(RoomJoinMsg(False, error_str='You need to log in to join a room!'))
-            return
-        user = self.login_mng.get_user(msg.owner)
-        id = msg.room_id
-        room = self.rooms[id]
-        room.guest = msg.owner
-        room.guest_username = user.username
-        room.host.out_queue.put(RoomInfoMsg(True, room.to_room_info()))
-        room.guest.out_queue.put(RoomJoinMsg(True, room.to_room_info()))
-
-    def _process_room_info_request(self, msg :RoomInfoRequest):
-        room = self._get_conn_room(msg.owner)
-        if room:
-            msg.owner.out_queue.put(RoomInfoMsg(
-                True,
-                room.to_room_info(),
-            ))
+            msg.owner.send(Response(msg.id, False, 'You need to be logged in to join a room'))
+        elif not room:
+            msg.owner.send(Response(msg.id, False, 'Room doesnt exist'))
+        elif room.guest is not None:
+            msg.owner.send(Response(msg.id, False, 'Room is full'))
         else:
-            msg.owner.out_queue.put(RoomInfoMsg(False))
+            user = self.login_mng.get_user(msg.owner)
+            id = msg.room_id
+            room = self.rooms[id]
+            room.guest = msg.owner
+            room.guest_username = user.username
+
+            updateMsg = RoomUpdatedMsg(room.to_room_info(), someone_joined_msg=user.username)
+            room.host.send(updateMsg)
+            room.guest.send(Response(msg.id, True))
+            room.guest.send(RoomUpdatedMsg(room.to_room_info(), joined=True))
 
     def _process_leave_room_request(self, msg :LeaveRoomRequest):
         room = self._get_conn_room(msg.owner)
         if room is None:
-            msg.owner.out_queue.put(RoomLeftMessage())
-            return
-        self._remove_conn_from_room(room, msg.owner)
+            msg.owner.send(Response(msg.id, False, 'Room doesnt exist'))
+        else:
+            msg.owner.send(Response(msg.id, True))
+            self._remove_conn_from_room(room, msg.owner)
     
-    def _remove_conn_from_room(self, room :Room, conn :Connection):
+    def _remove_conn_from_room(self, room :Room, conn :ServerConnection):
         if room.guest == conn:
+            user_leaving = room.guest_username
             room.guest = None
-            room.host.out_queue.put(RoomInfoMsg(room.to_room_info()))
-            conn.out_queue.put(RoomLeftMessage())
+            room.guest_username = None
+            room.host.send(RoomUpdatedMsg(room.to_room_info(), someone_left_msg=user_leaving))
         elif room.host == conn:
             if room.guest:
-                room.guest.out_queue.put(RoomLeftMessage('Host left the room'))
+                room.guest.send(RoomUpdatedMsg(None, kick_msg='Host left the room'))
             self.rooms.pop(room.id)
             print(f'Removing {room}')
-            conn.out_queue.put(RoomLeftMessage())
         else:
+            print(f'Room manager trying to remove connection from room that it doesnt belong to', flush=True)
             raise RuntimeError('what')
 
-
-    def _get_conn_room(self, conn :Connection) -> Room | None:
+    def _get_conn_room(self, conn :ServerConnection) -> Room | None:
         for room in self.rooms.values():
             if room.host == conn or room.guest == conn:
                 return room

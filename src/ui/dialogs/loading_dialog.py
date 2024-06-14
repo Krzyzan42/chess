@@ -12,6 +12,3 @@ class LoadingDialog(QDialog):
         self.label = QLabel('Loading, please wait...')
         layout.addWidget(self.label)
         self.setLayout(layout)
-
-    def set_message(self, text):
-        pass

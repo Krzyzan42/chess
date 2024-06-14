@@ -1,81 +1,61 @@
 from PySide6.QtCore import *
-from PySide6.QtCore import QObject, QTimerEvent
-from networking.client import *
-from networking.common import Connection, Message
-from networking.client.connect_thread import ConnectThread
-from networking import settings
-
-
+from networking.common import *
+import asyncio
+from networking.client.auth import Auth
+from networking.client.room import Room
+ 
 class Client(QObject):
-    state_changed = Signal(ClientState)
+    connected = Signal()
+    disconnected = Signal(str)
     msg_recieved = Signal(Message)
-    instance :'Client' = None
-    
-    _connection_thread :ConnectThread
-    _state :ClientState
-    _connection :Connection
-    _server_ip :str
-    _server_port :int
 
-    def __init__(self):
+    instance :'Client'
+    auth :Auth
+    room :Room
+
+    is_connected :bool
+
+    _connection :ClientConnection
+
+    def __init__(self) -> None:
         super().__init__()
-        if self.instance is not None:
-            raise RuntimeError('Cant have more than two client instances at once!')
+        self._connection = ClientConnection(on_disconnect=self._on_disconnect)
+        self.auth = Auth(self._connection)
+        self.room = Room(self._connection)
+        self.is_connected = False
+        Client.instance = self
 
-        self.instance = self
-        self._server_port = settings.server_port
-        self._server_ip = settings.server_ip
-        self._connection_thread = None
-        self._state = ClientState(ConnectionState.DISCONNECTED)
-        self._connection = None
-        self.startTimer(16)
+        self.msg_recieved.connect(self.auth.msg_recieved)
+        # self.msg_recieved.connect(self.room.msg_recieved)
 
     @staticmethod
     def setup():
         Client.instance = Client()
 
-    def connect_to_server(self):
-        if self._state.state == ConnectionState.DISCONNECTED:
-            self._connection_thread = ConnectThread(self._server_ip, self._server_port)
-            self._connection_thread.result_ready.connect(self._connection_result)
-            self._connection_thread.start()
-
-            self._state = ClientState(ConnectionState.CONNECTING)
-            self.state_changed.emit(self._state)
-
-    def disconnect_from_server(self):
-        if self._state.state == ConnectionState.CONNECTED:
-            self._connection.close()
-            self._connection = None
-            self._state = ClientState(ConnectionState.DISCONNECTED)
-            self.state_changed.emit(self._state)
-
-    @Slot(Message)
-    def send_msg(self, msg :Message):
-        if self._state.state == ConnectionState.CONNECTED:
-            self._connection.out_queue.put(msg)
-        
-    def timerEvent(self, _: QTimerEvent) -> None:
-        if self._state.state != ConnectionState.CONNECTED:
+    async def connect_to_server(self, host :str, port :int) -> str | None:
+        if self.is_connected:
             return
-        if not self._connection.is_alive():
-            self.disconnect_from_server()
-            return
-        
-        while not self._connection.in_queue.empty():
-            msg = self._connection.in_queue.get_nowait()
-            self.msg_recieved.emit(msg)
-
-    def _connection_result(self, success :bool, error_msg :str | None):
+            
+        success, error = await self._connection.connect(host, port)
         if success:
-            print('Client succesfully connected', flush=True)
-            self._state = ClientState(ConnectionState.CONNECTED)
-            self._connection = Connection(self._connection_thread.result_socket)
-            self._connection_thread = None
-            self.state_changed.emit(self._state)
+            self._read_task = asyncio.create_task(self._run())
+            self.is_connected = True
+            self.connected.emit()
         else:
-            print(f'Client failed to connect. Reason: {error_msg}', flush=True)
-            self._state = ClientState(ConnectionState.DISCONNECTED, error_msg)
-            self._connection = None
-            self._connection_thread = None
-            self.state_changed.emit(self._state)
+            return error
+
+    async def disconnect_from_server(self):
+        self.is_connected = False
+        self._connection.close()
+
+    async def _run(self):
+        try:
+            while True:
+                msg = await self._connection.pop_message()
+                self.msg_recieved.emit(msg) 
+        except SocketError as e:
+            return
+
+    def _on_disconnect(self, msg :str | None):
+        self.is_connected = False
+        self.disconnected.emit(msg)

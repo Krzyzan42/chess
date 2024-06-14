@@ -3,6 +3,9 @@ from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from ui import *
 from ui.menu_btn.MenuButton import MenuButton
+from networking.client import *
+from networking import settings
+import asyncio
 
 class MainMenu(QWidget):
     def __init__(self):
@@ -35,38 +38,31 @@ class MainMenu(QWidget):
         )
         background_img.setScaledContents(True)
         layout.addWidget(background_img, 6)
-        # layout.addStretch(75)
 
 
         self.setLayout(layout)
 
-        online_btn.pressed.connect(self._online_pressed)
+        online_btn.pressed.connect(lambda: asyncio.ensure_future(self._online_pressed()))
         offline_btn.pressed.connect(self._offline_pressed)
         exit_btn.pressed.connect(self._exit_pressed)
 
-    def _online_pressed(self):
-        self.connect_dialog = LoadingDialog(self)
-        self.connect_dialog.show()
-
-        self.connect_coroutine = ConnectCoroutine()
-        # connect_coroutine.setParent(self)
-        self.connect_coroutine.done.connect(self._connect_finished)
-        print('connected signal slot')
-        self.connect_coroutine.start_()
-
-    @Slot(bool, str)
-    def _connect_finished(self, success, error_msg):
-        print('finised')
-        self.connect_dialog.accept()
-        if success:
+    async def _online_pressed(self):
+        connect_dialog = LoadingDialog(self)
+        task = asyncio.create_task(Client.instance.connect_to_server(settings.server_ip, settings.server_port))
+        connect_dialog.show()
+        result = await task
+        if result is None:
+            print('connected')
             from ui import OnlineMenu
             ScreenManager.instance.set_screen(OnlineMenu())
         else:
-            print(f'Failed to connect to the server. Reason: {error_msg}')
+            print(f'{result}')
+        connect_dialog.accept()
 
     def _offline_pressed(self):
-        from ui import OfflineMenu
-        ScreenManager.instance.set_screen(OfflineMenu())
+        pass
+        # from ui import OfflineMenu
+        # ScreenManager.instance.set_screen(OfflineMenu())
 
     def _exit_pressed(self):
         QApplication.exit(0)

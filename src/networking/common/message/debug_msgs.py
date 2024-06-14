@@ -17,3 +17,14 @@ class EchoResponse(Message):
 @dataclass
 class CloseRequest(Message):
     msg_type = MSG_CLOSE
+
+@dataclass
+class HeartbeatMsg(Message):
+    msg_type = MSG_HEARTBEAT
+
+@dataclass
+class Response:
+    msg_type = MSG_RESPONSE
+    id :str
+    success :bool
+    error_str :str | None = None

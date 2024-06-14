@@ -1,4 +1,3 @@
-from .coroutines import *
-from .loading_dialog import LoadingDialog
+from .dialogs import LoadingDialog, ErrorDialog
 from .screen_manager import ScreenManager
 from .screens import *

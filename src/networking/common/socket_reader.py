@@ -1,19 +1,17 @@
 import socket
 import pickle
-import time
 from threading import Thread
 from queue import Queue
 from logging import log, DEBUG
 from networking.common import Message
+import time
 
 class SocketReader(Thread):
     conn :socket.socket
     incoming_messages :Queue[Message]
-    last_read_time :int
     owner = None
 
     def run(self):
-        self.last_read_time = time.time()
         self.conn_alive = True
         self.left_data = b''
 
@@ -51,7 +49,7 @@ class SocketReader(Thread):
         self.left_data = data[payload_size:]
         
         log(DEBUG, f'Read {msg_body}')
+        time.sleep(0.5)
         self.incoming_messages.put(msg_body)
-        self.last_read_time = time.time()
 
         return True

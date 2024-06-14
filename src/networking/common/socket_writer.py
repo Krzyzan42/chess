@@ -1,6 +1,5 @@
 import socket
 import pickle
-import time
 from threading import Thread
 from queue import Queue, Empty
 from logging import log, DEBUG
@@ -12,7 +11,6 @@ class SocketWriter(Thread):
     last_write_time :int
 
     def run(self):
-        self.last_write_time = time.time()
         self.conn_alive = True
         try:
             while self.conn_alive:
@@ -41,4 +39,3 @@ class SocketWriter(Thread):
 
         self.conn.sendall(bytes_sent)
         log(DEBUG, f'Sent {message}')
-        self.last_write_time = time.time()

@@ -11,29 +11,18 @@ class RoomInfo:
 class RoomCreateRequest(Message):
     msg_type = MSG_ROOM_CREATE_REQUEST
     room_name :str
+    id :str
 
 @dataclass
 class ListRoomsRequest(Message):
-    msg_type = MSG_LIST_ROOMS_REQUEST
+    msg_type = MSG_ROOM_LIST_REQUEST
+    id :str
 
 @dataclass
-class JoinRoomRequest(Message):
-    msg_type = MSG_JOIN_ROOM_REQUEST
-    room_id :int
-
-@dataclass
-class LeaveRoomRequest(Message):
-    msg_type = MSG_LEAVE_ROOM_REQUEST
-
-@dataclass
-class RoomInfoRequest(Message):
-    msg_type = MSG_ROOM_INFO_REQUEST
-
-
-@dataclass
-class RoomListMsg(Message):
-    msg_type = MSG_ROOM_LIST
+class RoomListResponse(Message):
+    msg_type = MSG_ROOM_LIST_RESPONSE
     rooms :list[RoomInfo]
+    id :str
 
     def __str__(self) -> str:
         result = ''
@@ -42,19 +31,26 @@ class RoomListMsg(Message):
         return result
 
 @dataclass
-class RoomJoinMsg(Message):
-    msg_type = MSG_ROOM_JOIN
-    success :bool
-    room_info :RoomInfo | None = None
-    error_str :str | None = None
+class JoinRoomRequest(Message):
+    msg_type = MSG_JOIN_ROOM_REQUEST
+    room_id :int
+    id :str
 
 @dataclass
-class RoomInfoMsg(Message):
-    msg_type = MSG_ROOM_INFO
-    is_in_room :bool
+class LeaveRoomRequest(Message):
+    msg_type = MSG_LEAVE_ROOM_REQUEST
+    id :str
+
+@dataclass 
+class StartGameRequest(Message):
+    msg_type = MSG_START_GAME_REQUEST
+    id :str
+
+@dataclass
+class RoomUpdatedMsg(Message):
+    msg_type = MSG_ROOM_UPDATED
     room :RoomInfo | None = None
-
-@dataclass
-class RoomLeftMessage(Message):
-    msg_type = MSG_ROOM_LEFT
-    reason :str | None = None
+    kick_msg :str | None = None
+    someone_joined_msg :str | None = None
+    someone_left_msg :str | None = None
+    joined :bool | None = None
