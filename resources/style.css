@@ -34,3 +34,37 @@ MenuButton:disabled {
     background-color: #353535;
     color: #aaa;
 }
+
+QTabWidget { 
+    color: white;
+    background-color: #222;
+}
+
+QTabBar::tab { 
+    color: white;
+    background-color: #444;
+    padding: 10px 20px;
+    font-size: 11px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: #333;
+}
+
+InfoWidget > ImgLbl {
+    background-color: #444;
+    border-color: #888;
+    border-style: solid;
+    border-width: 4px;
+    border-radius: 7px;
+}
+
+InfoWidget > VsLabel {
+    font-size: 30px;
+    font-weight: 900;
+}
+
+InfoWidget > PlayerLabel {
+    font-size: 15px;
+
+}

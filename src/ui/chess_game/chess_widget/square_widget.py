@@ -1,4 +1,4 @@
-from chess_widget.game import Context
+from . import *
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QMouseEvent, QPaintEvent, QPainter, QColor
@@ -59,19 +59,22 @@ class BoardSquare(QWidget):
             y = self.size().height() / 2 - rad / 2
             painter.drawEllipse(x, y, rad, rad)
 
-        board = Context.controller.get_board()
-        if board.piece_at(self.square) != None:
-            self.draw_piece(board.piece_at(self.square))
+        if Context.board:
+            if Context.board.piece_at(self.square) != None:
+                self.draw_piece(Context.board.piece_at(self.square))
 
     def get_background_type(self) -> 'Background':
-        board = Context.controller.get_board()
+        if Context.board is None:
+            return Background.Normal
+
+        board = Context.board
         piece = board.piece_at(self.square)
         if piece and piece.piece_type == KING and piece.color == board.turn:
             if board.is_check() or board.is_checkmate():
                 return Background.Check
 
-        if Context.selection.selected_square is not None:
-            if self.square == Context.selection.selected_square:
+        if Context.selection.square is not None:
+            if self.square == Context.selection.square:
                 return Background.Selected
             piece = board.piece_at(self.square)
             if piece is not None and self.square in Context.selection.possible_moves():
@@ -93,7 +96,7 @@ class BoardSquare(QWidget):
         painter.drawPixmap(0, 0, pixmap)
     
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        self.square_clicked.emit(self.square)
+        Context.selection.select(self.square)
         event.accept()
     
 class Background(Enum):

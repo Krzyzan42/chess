@@ -1,5 +1,4 @@
 from chess import Square, square_name
-from chess_widget.game import Context
 from PySide6.QtCore import QObject, Signal
 
 class BoardSelection(QObject):

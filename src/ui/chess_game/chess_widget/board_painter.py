@@ -2,8 +2,7 @@ from PySide6.QtGui import QMouseEvent, QPaintEvent, QPainter, QColor
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Signal, Slot
 from chess import Square, SQUARES
-from chess_widget.game import Context
-from .square_widget import BoardSquare
+from . import *
 
 class BoardPainter(QWidget):
     square_clicked = Signal(Square)
@@ -16,9 +15,6 @@ class BoardPainter(QWidget):
         self.setFixedSize(Context.params.board_size)
         self.setMinimumSize(Context.params.board_size)
         self.setup_squares()
-
-        Context.selection.selection_changed.connect(lambda x: self.repaint())
-        Context.controller.board_changed.connect(lambda x: self.repaint())
 
         self.setGeometry(0, 0, 480, 480)
 
