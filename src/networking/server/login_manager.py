@@ -57,7 +57,7 @@ class LoginManager:
             msg.owner.send(Response(
                 msg.id,
                 False,
-                'User not found or invalid password', 
+                'Invalid password or username', 
             ))
         else:
             self.logged_users[msg.owner] = user
@@ -80,6 +80,14 @@ class LoginManager:
                 msg.id,
                 False,
                 'Cant create an account while logged in'
+            ))
+        elif len(msg.username) < 3 or len(msg.username) > 15:
+            msg.owner.send(Response(
+                msg.id, False, 'Username has to be between 3 and 15 characters long'
+            ))
+        elif len(msg.password) < 3 or len(msg.password) > 100:
+            msg.owner.send(Response(
+                msg.id, False, 'Password has to be between 3 and 100 characters long'
             ))
         else:
             user = User.create(

@@ -16,7 +16,13 @@ QPushButton {
     background-color: #333;
     color: #ddd;
     font-size: 25px;
-    text-align: left;
+    text-align: center;
+    border: 1px solid #888;
+    padding: 10px;
+}
+
+QPushButton:hover {
+    background-color: #555;
 }
 
 MenuButton {
@@ -24,6 +30,7 @@ MenuButton {
     margin: 0px;
     border: none;
     border-bottom: 1px solid #888;
+    text-align: left;
 }
 
 MenuButton:hover {
@@ -66,5 +73,81 @@ InfoWidget > VsLabel {
 
 InfoWidget > PlayerLabel {
     font-size: 15px;
-
 }
+
+/* ------------------------------------ */
+/* FORMS */
+/* ------------------------------------ */
+Form {
+    max-width: 400px;
+    padding: 60px 20px 20px 20px;
+    background-color: #333;
+    border: 1px solid rgb(49, 221, 78);
+    border-radius: 10px;
+}
+
+Form > QLabel {
+    font-size: 15px;
+    margin-top: 20px;
+}
+
+Form > Title {
+    font-size: 40px;
+    font-weight: 900;
+    margin: 10px 10px 30px 10px;
+}
+
+Form > QPushButton {
+    margin-top: 30px;
+}
+
+Form > AcceptBtn {
+    background-color: #409c2d;
+}
+
+Form > AcceptBtn:hover {
+    background-color: #338024;
+}
+
+Form > QLineEdit {
+    background-color: #555;
+    border: 1px solid #666;
+    padding: 10px;
+    font-size: 19px;
+    color: white;
+}
+
+/* ------------------------------------ */
+/* Dialogs */
+/* ------------------------------------ */
+QDialog {
+    min-width: 300px;
+    min-height: 150px;
+}
+
+QDialog > TitleLbl {
+    background-color: #409c2d;
+    text-align: center;
+    padding: 10px;
+    font-size: 30px;
+    font-weight: 900;
+}
+
+QDialog > MsgLbl {
+    padding: 10px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+QDialog > QPushButton {
+    margin: 10px;
+    font-size: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+ErrorDialog > TitleLbl {
+    background-color: #c03737;
+}
+

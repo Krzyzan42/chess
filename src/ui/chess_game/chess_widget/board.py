@@ -22,7 +22,7 @@ class Board(QWidget):
         Context.selection.clear_selection()
         # self.repaint()
 
-    def set_selectable(selectable :bool):
+    def set_selectable(self, selectable :bool):
         Context.selection.set_selectable(selectable)
 
     def setup_game_context(self):

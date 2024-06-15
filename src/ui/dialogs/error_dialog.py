@@ -1,20 +1,42 @@
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-class ErrorDialog(QDialog):
-    def __init__(self, parent=None, msg :str = ''):
-        super().__init__(parent)
+class TitleLbl(QLabel):
+    pass
 
-        self.setWindowFlag(Qt.WindowCloseButtonHint, False)
+class MsgLbl(QLabel):
+    pass
+
+class ErrorDialog(QDialog):
+    _title_lbl :QLabel
+    _message_lbl :MsgLbl
+
+    def __init__(self, parent=None, msg :str = 'Message', title :str = 'Title'):
+        super().__init__(parent)
         self.setModal(True)
 
         layout = QVBoxLayout()
-        self.label = QLabel(msg)
+        self._title_lbl = TitleLbl()
+        self._title_lbl.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Preferred,
+        )
+        layout.addWidget(self._title_lbl)
+        layout.setContentsMargins(0,0,0,0)
+
+        self._message_lbl = MsgLbl()
         self.btn = QPushButton('Close')
         self.btn.pressed.connect(self.accept)
-        layout.addWidget(self.label)
-        layout.addWidget(self.btn)
+        layout.addWidget(self._message_lbl, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.btn, alignment=Qt.AlignmentFlag.AlignRight)
+
         self.setLayout(layout)
 
-    def set_msg(self, msg :str = ''):
-        self.label.setText(msg)
+        self.set_msg(msg)
+        self.set_title(title)
+
+    def set_msg(self, msg :str):
+        self._message_lbl.setText(msg)
+
+    def set_title(self, title :str):
+        self._title_lbl.setText(title)

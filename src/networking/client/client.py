@@ -3,6 +3,8 @@ from networking.common import *
 import asyncio
 from networking.client.auth import Auth
 from networking.client.room import Room
+from networking.client.game import Game
+
  
 class Client(QObject):
     connected = Signal()
@@ -12,6 +14,7 @@ class Client(QObject):
     instance :'Client'
     auth :Auth
     room :Room
+    game :Game 
 
     is_connected :bool
 
@@ -22,11 +25,13 @@ class Client(QObject):
         self._connection = ClientConnection(on_disconnect=self._on_disconnect)
         self.auth = Auth(self._connection)
         self.room = Room(self._connection)
+        self.game = Game(self._connection)
         self.is_connected = False
         Client.instance = self
 
         self.msg_recieved.connect(self.auth.msg_recieved)
         self.msg_recieved.connect(self.room.msg_recieved)
+        self.msg_recieved.connect(self.game.msg_recieved)
 
     @staticmethod
     def setup():

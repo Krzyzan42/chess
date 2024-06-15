@@ -9,12 +9,16 @@ class Server:
     connection_manager :ConnectionManager
     login_manager :LoginManager
     room_manager :RoomManager
+    game_manager :GameManager
 
     def __init__(self):
         self.msg_queue = asyncio.Queue()
         self.connection_manager = ConnectionManager()
         self.login_manager = LoginManager()
         self.room_manager = RoomManager()
+        self.game_manager = GameManager()
+
+        self.room_manager.game_mng = self.game_manager
 
     async def run(self):
         server = await asyncio.start_server(
@@ -34,8 +38,10 @@ class Server:
             self.connection_manager.process_message(msg)
             self.login_manager.process_message(msg)
             self.room_manager.process_message(msg)
+            self.game_manager.process_message(msg)
 
         self.room_manager.update()
+        # self.game_manager.update()
 
         dead_conns = self.connection_manager.get_dead_connections()
         self.login_manager.cleanup_connections(dead_conns)

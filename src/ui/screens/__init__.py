@@ -1,8 +1,11 @@
-from .main_menu import MainMenu
-# from .offline_menu import OfflineMenu
-from .online_menu import OnlineMenu
+from .chess_spectate import ChessSpectate
+from .chess_vs_friend import ChessVsFriend
+from .chess_vs_online import ChessVsOnline
 from .create_room import CreateRoomScreen
-from .room_list_screen import RoomListScreen
 from .login_screen import LoginScreen
+from .main_menu import MainMenu
+from .offline_menu import OfflineMenu
+from .online_menu import OnlineMenu
 from .register_screen import RegisterScreen
+from .room_list_screen import RoomListScreen
 from .room_screen import RoomScreen

@@ -6,6 +6,18 @@ from networking.client import *
 from ui.dialogs import *
 import asyncio
 
+class Form(QFrame):
+    pass
+
+class Title(QLabel):
+    pass
+
+class AcceptBtn(QPushButton):
+    pass
+
+class DeclineBtn(QPushButton):
+    pass
+
 class LoginScreen(QWidget):
     client :Client
 
@@ -16,19 +28,27 @@ class LoginScreen(QWidget):
 
     def setup_widgets(self):
         layout = QHBoxLayout()
-        left_bar = QVBoxLayout()
+        
+        form = Form()
+        central_layout = QVBoxLayout()
         self.login_input = QLineEdit()
         self.password_input = QLineEdit()
-        self.login_btn = QPushButton('Login')
-        self.exit_btn = QPushButton('Exit')
-        left_bar.addWidget(QLabel('Enter login'))
-        left_bar.addWidget(self.login_input)
-        left_bar.addWidget(QLabel('Enter password'))
-        left_bar.addWidget(self.password_input)
-        left_bar.addWidget(self.exit_btn)
-        left_bar.addWidget(self.login_btn)
-        layout.addLayout(left_bar, 25)
-        layout.addStretch(75)
+        self.password_input.setEchoMode(QLineEdit.Password)
+        self.login_btn = AcceptBtn('Login')
+        self.exit_btn = DeclineBtn('Exit')
+        central_layout.addWidget(Title('Login'), alignment=Qt.AlignmentFlag.AlignHCenter)
+        central_layout.addWidget(QLabel('Enter login'))
+        central_layout.addWidget(self.login_input)
+        central_layout.addWidget(QLabel('Enter password'))
+        central_layout.addWidget(self.password_input)
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.exit_btn)
+        btn_layout.addWidget(self.login_btn)
+        central_layout.addLayout(btn_layout)
+        form.setLayout(central_layout)
+
+        layout.addWidget(form)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(layout)
 
@@ -38,16 +58,16 @@ class LoginScreen(QWidget):
     async def _login(self):
         username = self.login_input.text()
         password = self.password_input.text()
-        dialog = LoadingDialog(self)
-        dialog.show()
+        self.dialog = LoadingDialog(self)
+        self.dialog.show()
         result = await self.client.auth.login(username, password)
-        dialog.accept()
+        self.dialog.accept()
 
         if result.success:
             self._exit()
         else:
-            dialog = ErrorDialog(self, msg=result.error_str)
-            dialog.exec()
+            self.dialog = ErrorDialog(self, msg=result.error_str)
+            self.dialog.show()
         
 
     def _exit(self):

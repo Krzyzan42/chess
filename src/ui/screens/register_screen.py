@@ -5,6 +5,18 @@ from networking.common import *
 from networking.client import *
 import asyncio
 
+class Form(QFrame):
+    pass
+
+class Title(QLabel):
+    pass
+
+class AcceptBtn(QPushButton):
+    pass
+
+class DeclineBtn(QPushButton):
+    pass
+
 class RegisterScreen(QWidget):
     client :Client
 
@@ -15,19 +27,28 @@ class RegisterScreen(QWidget):
 
     def setup_widgets(self):
         layout = QHBoxLayout()
-        left_bar = QVBoxLayout()
+
+        form = Form()
+        central_layout = QVBoxLayout()
         self.login_input = QLineEdit()
         self.password_input = QLineEdit()
-        self.register_btn = QPushButton('Register')
-        self.exit_btn = QPushButton('Exit')
-        left_bar.addWidget(QLabel('Enter login'))
-        left_bar.addWidget(self.login_input)
-        left_bar.addWidget(QLabel('Enter password'))
-        left_bar.addWidget(self.password_input)
-        left_bar.addWidget(self.exit_btn)
-        left_bar.addWidget(self.register_btn)
-        layout.addLayout(left_bar, 25)
-        layout.addStretch(75)
+        self.password_input.setEchoMode(QLineEdit.Password)
+        self.register_btn = AcceptBtn('Register')
+        self.exit_btn = DeclineBtn('Exit')
+        central_layout.addWidget(Title('Register'), alignment=Qt.AlignmentFlag.AlignHCenter)
+
+        central_layout.addWidget(QLabel('Username'))
+        central_layout.addWidget(self.login_input)
+        central_layout.addWidget(QLabel('Password'))
+        central_layout.addWidget(self.password_input)
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.exit_btn)
+        btn_layout.addWidget(self.register_btn)
+        central_layout.addLayout(btn_layout)
+        form.setLayout(central_layout)
+
+        layout.addWidget(form)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(layout)
 

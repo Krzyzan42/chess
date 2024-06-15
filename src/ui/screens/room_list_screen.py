@@ -15,6 +15,7 @@ class RoomListScreen(QWidget):
         self._setup_widgets()
 
         self.client = Client.instance
+        self.client.room.joined_room.connect(self._room_joined)
         ensure_future(self._refresh())
 
     def _setup_widgets(self):
@@ -22,17 +23,20 @@ class RoomListScreen(QWidget):
         self.back_btn = QPushButton('Back')
         self.refresh_btn = QPushButton('Refresh')
         self.join_btn = QPushButton('Join')
+        self.spectate_btn = QPushButton('Spectate')
         self.room_list = RoomListWidget()
         
         layout.addWidget(self.back_btn)
         layout.addWidget(self.refresh_btn)
         layout.addWidget(self.join_btn)
+        layout.addWidget(self.spectate_btn)
         layout.addWidget(self.room_list)
         self.setLayout(layout)
 
         self.back_btn.pressed.connect(self._go_back)
         self.refresh_btn.pressed.connect(lambda: ensure_future(self._refresh()))
-        self.join_btn.pressed.connect(lambda: ensure_future(self._join()))
+        self.join_btn.pressed.connect(lambda: ensure_future(self._join(False)))
+        self.spectate_btn.pressed.connect(lambda: ensure_future(self._join(True)))
         self.room_list.selection_changed.connect(self._on_room_selected)
         self._on_room_selected(None)
 
@@ -40,7 +44,6 @@ class RoomListScreen(QWidget):
         print(f'Selected room: {room}')
         is_selected = room is not None
         self.join_btn.setEnabled(is_selected)
-
 
     def _go_back(self):
         from ui.screens import OnlineMenu
@@ -53,21 +56,19 @@ class RoomListScreen(QWidget):
         self.room_list.set_rooms(result)
         self.refresh_btn.setEnabled(True)
 
-    async def _join(self):
+    async def _join(self, spectate):
         room = self.room_list.get_current_room()
         if room is None:
             return
 
         self.loading_dialog = LoadingDialog(self)
         self.loading_dialog.show()
-        result = await self.client.room.join_room(room.room_id)
+        result = await self.client.room.join_room(room.room_id, spectate)
         self.loading_dialog.accept()
 
-        if result.success:
-            self._go_to_room_screen()
-        else:
+        if not result.success:
             ErrorDialog(self, result.error_str).exec()
 
-    def _go_to_room_screen(self):
-        from ui import RoomScreen
+    def _room_joined(self, room_info):
+        from ui.screens.room_screen import RoomScreen
         ScreenManager.instance.set_screen(RoomScreen())

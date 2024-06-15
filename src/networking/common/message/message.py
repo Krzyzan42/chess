@@ -27,9 +27,22 @@ MESSAGES = [
     MSG_ROOM_INFO_REQUEST,
     MSG_ROOM_INFO_RESPONSE,
     MSG_START_GAME_REQUEST,
+    MSG_ROOM_LEFT,
     MSG_ROOM_UPDATED,
+    MSG_ROOM_JOINED,
+
+    MSG_GAME_SEND_MSG_REQUEST,
+    MSG_GAME_MOVE_REQUEST,
+    MSG_GAME_SURRENDER_REUQEST,
+    MSG_LEAVE_SPECTATE_REQUEST,
+
     MSG_GAME_STARTED,
-] = range(1, 21)
+    MSG_GAME_UPDATED,
+    MSG_GAME_ENDED,
+
+    MSG_GAME_HISTORY_REQUEST,
+    MSG_GAME_HISTORY_RESPONSE,
+] = range(1, 31)
 
 # Message can store recieving connection as an owner.
 # Useful for server side logic, where all messages

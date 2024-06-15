@@ -35,6 +35,7 @@ class JoinRoomRequest(Message):
     msg_type = MSG_JOIN_ROOM_REQUEST
     room_id :int
     id :str
+    spectate :bool = False
 
 @dataclass
 class LeaveRoomRequest(Message):
@@ -46,11 +47,19 @@ class StartGameRequest(Message):
     msg_type = MSG_START_GAME_REQUEST
     id :str
 
+
+@dataclass
+class RoomJoinedMsg(Message):
+    msg_type = MSG_ROOM_JOINED
+    room :RoomInfo
+    spectates :bool
+
 @dataclass
 class RoomUpdatedMsg(Message):
     msg_type = MSG_ROOM_UPDATED
     room :RoomInfo | None = None
+
+@dataclass
+class RoomLeftMsg(Message):
+    msg_type = MSG_ROOM_LEFT
     kick_msg :str | None = None
-    someone_joined_msg :str | None = None
-    someone_left_msg :str | None = None
-    joined :bool | None = None
