@@ -5,6 +5,18 @@ from networking.client import *
 from ui import *
 import asyncio
 
+class Form(QFrame):
+    pass
+
+class Title(QLabel):
+    pass
+
+class AcceptBtn(QPushButton):
+    pass
+
+class DeclineBtn(QPushButton):
+    pass
+
 class CreateRoomScreen(QWidget):
     client :Client
 
@@ -15,20 +27,24 @@ class CreateRoomScreen(QWidget):
 
     def setup_widgets(self):
         layout = QHBoxLayout()
-        left_bar = QVBoxLayout()
-        title = QLabel('Create room')
-        title.setStyleSheet('font-size: 25px')
+
+        form = Form()
+        central_layout = QVBoxLayout()
+        title = Title('Create room')
         self.room_name_input = QLineEdit()
         self.room_name_input.setPlaceholderText('Room name')
-        cancel_btn = QPushButton('Cancel')
-        create_btn = QPushButton('Create')
-        left_bar.addWidget(title)
-        left_bar.addWidget(self.room_name_input)
-        left_bar.addWidget(cancel_btn)
-        left_bar.addWidget(create_btn)
-        layout.addLayout(left_bar, 25)
-        layout.addStretch(75)
+        cancel_btn = DeclineBtn('Cancel')
+        create_btn = AcceptBtn('Create')
+        central_layout.addWidget(title)
+        central_layout.addWidget(self.room_name_input)
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(cancel_btn)
+        btn_layout.addWidget(create_btn)
+        central_layout.addLayout(btn_layout)
+        form.setLayout(central_layout)
 
+        layout.addWidget(form)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setLayout(layout)
 
         cancel_btn.pressed.connect(self._cancel_pressed)
@@ -40,15 +56,17 @@ class CreateRoomScreen(QWidget):
     
     async def _create_room(self):
         name = self.room_name_input.text()
-        _loading_dialog = LoadingDialog()
-        _loading_dialog.show()
+        self._loading_dialog = LoadingDialog(ScreenManager.instance.window)
+        self._loading_dialog.show()
         result = await self.client.room.create_room(name)
-        _loading_dialog.accept()
+        self._loading_dialog.accept()
+        self._loading_dialog.deleteLater()
 
         if result.success:
             self.go_to_room_screen()
         else:
-            ErrorDialog(self,result.error_str).exec()
+            self.dialog = ErrorDialog(ScreenManager.instance.window,result.error_str)
+            self.dialog.show()
 
     def go_to_room_screen(self):
         from ui import RoomScreen

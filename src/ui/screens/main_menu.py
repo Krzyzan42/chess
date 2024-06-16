@@ -1,6 +1,7 @@
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
+from PySide6 import QtAsyncio
 from ui import *
 from ui.menu_btn.MenuButton import MenuButton
 from networking.client import *
@@ -60,9 +61,8 @@ class MainMenu(QWidget):
         connect_dialog.accept()
 
     def _offline_pressed(self):
-        pass
-        # from ui import OfflineMenu
-        # ScreenManager.instance.set_screen(OfflineMenu())
+        from ui import OfflineMenu
+        ScreenManager.instance.set_screen(OfflineMenu())
 
     def _exit_pressed(self):
-        QApplication.exit(0)
+        QCoreApplication.quit()

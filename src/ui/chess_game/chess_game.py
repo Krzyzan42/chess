@@ -32,11 +32,15 @@ class ChessGame(QWidget):
     def set_selectable(self, selectable :bool):
         self._chessboard.set_selectable(selectable)
 
-    def show_messages(self, show :bool):
-        pass
+    def set_messages_visible(self, show :bool):
+        self._tab_widget.setTabEnabled(1, show)
 
     def set_names(self, black_name :str, white_name :str):
-        pass
+        self._info_widget.set_black_name(black_name)
+        self._info_widget.set_white_name(white_name)
+
+    def is_selectable(self) -> bool:
+        return self._chessboard.is_selectable()
 
     def _setup_widgets(self):
         layout = QHBoxLayout()
@@ -51,8 +55,8 @@ class ChessGame(QWidget):
         self._tab_widget = QTabWidget()
         self._msg_bar = MessageBar()
         self._history_bar = HistoryBar()
-        self._tab_widget.addTab(self._msg_bar, 'Chatroom')
         self._tab_widget.addTab(self._history_bar, 'Moves')
+        self._tab_widget.addTab(self._msg_bar, 'Chatroom')
         self._tab_widget.tabBar().setExpanding(True)
         left_bar.addWidget(self._info_widget)
         left_bar.addWidget(self._tab_widget)

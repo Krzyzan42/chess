@@ -49,7 +49,7 @@ class SocketReader(Thread):
         self.left_data = data[payload_size:]
         
         log(DEBUG, f'Read {msg_body}')
-        time.sleep(0.1)
+        time.sleep(0.5)
         self.incoming_messages.put(msg_body)
 
         return True

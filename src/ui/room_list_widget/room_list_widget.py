@@ -2,11 +2,15 @@ from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 from networking.common import *
 from networking.client import *
+from . import RoomEntry
 
-class RoomListWidget(QWidget):
-    selection_changed = Signal(RoomInfo)
+class RoomListWidget(QFrame):
+    join = Signal(RoomInfo)
+    spectate = Signal(RoomInfo)
 
-    _rooms :list[RoomInfo]
+    _loading_text :QLabel
+    _room_list :QFrame
+
 
     def __init__(self):
         super().__init__()
@@ -15,40 +19,52 @@ class RoomListWidget(QWidget):
     
     def setup_widgets(self):
         layout = QVBoxLayout()
+
+        self._loading_text = QLabel('Loading...')
+        self._loading_text.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+        self._loading_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        self.title_lbl = QLabel('Room list:')
-        self.room_list = QListWidget()
-        self.loading_widget = QLabel('Loading')
-        self.room_list.currentRowChanged.connect(self._selection_changed)
+        self._room_list = QFrame()
+        self._room_list.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+        self._room_list.setLayout(QVBoxLayout())
+        self._room_list.layout().setContentsMargins(0,0,0,0)
 
-        layout.addWidget(self.title_lbl)
-        layout.addWidget(self.room_list)
-        layout.addWidget(self.loading_widget)
-
+        layout.addWidget(self._loading_text)
+        layout.addWidget(self._room_list)
+        layout.setContentsMargins(0,0,0,0)
         self.setLayout(layout)
+        
+        self.set_loading()
 
     def set_rooms(self, rooms :list[RoomInfo]):
-        self._rooms = rooms
+        while self._room_list.layout().count():
+            widget = self._room_list.layout().takeAt(0).widget()
+            if widget is not None:
+                widget.deleteLater()
 
-        self.room_list.clear()
         for room in rooms:
-            self.room_list.addItem(room.room_name)
-
-        self.room_list.setVisible(True)
-        self.loading_widget.setVisible(False)
+            room_widget = RoomEntry()
+            room_widget.set_room_info(room)
+            room_widget.join.connect(self.join)
+            room_widget.spectate.connect(self.spectate)
+            self._room_list.layout().addWidget(room_widget)
+        self._room_list.layout().addStretch(1)
+        if len(rooms) != 0:
+            self._room_list.setVisible(True)
+            self._loading_text.setVisible(False)
+        else:
+            self._room_list.setVisible(False)
+            self._loading_text.setVisible(True)
+            self._loading_text.setText('There are no rooms, but you can create one!')
 
     def set_loading(self):
-        self.room_list.clear()
         self._rooms.clear()
-        self.room_list.setVisible(False)
-        self.loading_widget.setVisible(True)
-
-    def get_current_room(self) -> RoomInfo | None:
-        index = self.room_list.currentRow()
-        if index == -1:
-            return None
-        else:
-            return self._rooms[index]
-
-    def _selection_changed(self):
-        self.selection_changed.emit(self.get_current_room())
+        self._room_list.setVisible(False)
+        self._loading_text.setText('Loading...')
+        self._loading_text.setVisible(True)

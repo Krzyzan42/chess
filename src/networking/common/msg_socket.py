@@ -31,11 +31,11 @@ class MsgSocket:
             self._update_task = asyncio.create_task(self.update())
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((host, port))
-            self._reader = SocketReader()
+            self._reader = SocketReader(daemon=True)
             self._reader.conn = sock
             self._reader.incoming_messages = self._in_msg
             self._reader.start()
-            self._writer = SocketWriter()
+            self._writer = SocketWriter(daemon=True)
             self._writer.conn = sock
             self._writer.outgoing_messages = self._out_msg
             self._writer.start()

@@ -60,9 +60,10 @@ class ChessVsOnline(QWidget):
             self._chess_game.set_selectable(game.can_move)
             self._chess_game.set_messages(game.messages)
             self._chess_game.set_move_history(game.moves)
+            self._chess_game.set_names(game.guestname, game.hostname)
 
     def _game_finished(self, win :bool | None, reason :str):
-        dialog = EndDialog()
+        dialog = EndDialog(self)
         dialog.set_win(win, reason)
         dialog.accepted.connect(self._go_back)
         dialog.show()

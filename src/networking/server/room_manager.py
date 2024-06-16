@@ -115,7 +115,7 @@ class RoomManager:
             conn.send(RoomLeftMsg(None))
         elif room.host == conn:
             if room.guest:
-                room.guest.send(RoomLeftMsg(None, kick_msg='Host left the room'))
+                room.guest.send(RoomLeftMsg(kick_msg='Host left the room'))
             room.host.send(RoomLeftMsg(None))
             self.rooms.pop(room.id)
             print(f'Removing {room}')

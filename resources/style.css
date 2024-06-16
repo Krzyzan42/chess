@@ -25,6 +25,18 @@ QPushButton:hover {
     background-color: #555;
 }
 
+ActiveBtn {
+    background-color: #409c2d;
+}
+
+ActiveBtn:hover {
+    background-color: #338024;
+}
+
+ActiveBtn:disabled {
+    background-color: #2d5f1e;
+}
+
 MenuButton {
     padding: 20px;
     margin: 0px;
@@ -58,7 +70,12 @@ QTabBar::tab:selected, QTabBar::tab:hover {
     background: #333;
 }
 
-InfoWidget > ImgLbl {
+
+/* ------------------------------------ */
+/* FORMS */
+/* ------------------------------------ */
+
+InfoWidget ImgLbl {
     background-color: #444;
     border-color: #888;
     border-style: solid;
@@ -66,13 +83,42 @@ InfoWidget > ImgLbl {
     border-radius: 7px;
 }
 
-InfoWidget > VsLabel {
+InfoWidget VsLabel {
     font-size: 30px;
     font-weight: 900;
 }
 
-InfoWidget > PlayerLabel {
+InfoWidget PlayerLabel {
     font-size: 15px;
+}
+
+EndDialog {
+    background-color: #111;
+}
+
+EndDialog > InfoWidget ImgLbl {
+    background-color: #444;
+    border-color: #888;
+    border-style: solid;
+    border-width: 4px;
+    border-radius: 7px;
+}
+
+EndDialog VsLabel {
+    font-size: 30px;
+    font-weight: 900;
+}
+
+EndDialog PlayerLabel {
+    font-size: 15px;
+}
+
+QTabBar::tab:disabled
+{
+    min-width: 0px;
+    max-width: 0px; 
+    color: rgba(0,0,0,0);
+    background-color: rgba(0,0,0,0);
 }
 
 /* ------------------------------------ */
@@ -121,11 +167,11 @@ Form > QLineEdit {
 /* Dialogs */
 /* ------------------------------------ */
 QDialog {
-    min-width: 300px;
-    min-height: 150px;
+    min-width: 400px;
+    min-height: 200px;
 }
 
-QDialog > TitleLbl {
+QDialog TitleLbl {
     background-color: #409c2d;
     text-align: center;
     padding: 10px;
@@ -133,21 +179,128 @@ QDialog > TitleLbl {
     font-weight: 900;
 }
 
-QDialog > MsgLbl {
+QDialog MsgLbl {
     padding: 10px;
     margin-top: 20px;
     margin-bottom: 10px;
     font-size: 15px;
 }
 
-QDialog > QPushButton {
+QDialog QPushButton {
     margin: 10px;
     font-size: 15px;
     padding-left: 15px;
     padding-right: 15px;
 }
 
-ErrorDialog > TitleLbl {
+ErrorDialog TitleLbl {
     background-color: #c03737;
 }
 
+EndDialog Title {
+    background-color: #338024;
+    font-size: 30px;
+}
+EndDialog Reason {
+    margin: 10px;
+}
+
+/* ------------------------------------ */
+/* ROOM SCREEN */
+/* ------------------------------------ */
+RoomScreen TopBar {
+    max-height: 70px;
+    background-color: #409c2d;
+    font-size: 60px;
+}
+
+RoomScreen Title {
+    font-size: 45px;
+    font-weight: 900;
+    text-align: center;
+}
+
+RoomScreen VsLabel {
+    font-size: 70px;
+    font-weight: 900;
+    text-align: center;
+}
+
+RoomScreen ImgLbl {
+    background-color: #666;
+    border: 4px solid #338024;
+    border-radius: 20px;
+    min-width: 200px;
+    min-height: 200px;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+
+RoomScreen PlayerLabel {
+    font-size: 25px;
+    font-weight: 900;
+    text-align: left;
+}
+
+RoomScreen QPushButton {
+    min-width: 100px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+RoomScreen AcceptBtn {
+    background-color: #409c2d;
+}
+
+RoomScreen AcceptBtn:hover {
+    background-color: #338024;
+}
+
+RoomScreen AcceptBtn:disabled {
+    background-color: #2d5f1e;
+}
+
+/* ------------------------------------ */
+/* ROOM LIST SCREEN */
+/* ------------------------------------ */
+RoomListWidget {
+    background-color: #111;
+    margin: 10px;
+}
+
+RoomEntry {
+    background-color: #333;
+    border-bottom: 1px solid #666;
+}
+
+RoomEntry Title {
+    font-size: 25px;
+}
+
+RoomEntry Host {
+    font-size: 13px;
+}
+
+RoomEntry QPushButton {
+    font-size: 16px;
+}
+
+/* ------------------------------------ */
+/* ROOM LIST SCREEN */
+/* ------------------------------------ */
+ChessVsFriend TopBar {
+    background-color: #444;
+}
+ChessVsFriend TopBar QPushButton {
+    min-width: 150px;
+    max-height: 70px;
+    border: none;
+}
+ChessVsBot TopBar {
+    background-color: #444;
+}
+ChessVsBot TopBar QPushButton {
+    min-width: 150px;
+    max-height: 70px;
+    border: none;
+}

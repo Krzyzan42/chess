@@ -25,6 +25,9 @@ class Board(QWidget):
     def set_selectable(self, selectable :bool):
         Context.selection.set_selectable(selectable)
 
+    def is_selectable(self) -> bool:
+        return Context.selection._is_selectable
+
     def setup_game_context(self):
         Context.params = BoardParams()
         Context.pixmaps = get_figure_pixmaps()

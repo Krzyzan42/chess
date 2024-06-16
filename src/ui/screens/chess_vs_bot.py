@@ -4,6 +4,7 @@ from ui.chess_game.end_dialog import EndDialog
 from ui.screen_manager import ScreenManager
 from ui.chess_game import ChessGame
 import chess
+from stockfish import Stockfish
 
 class TopBar(QFrame):
     exit = Signal()
@@ -24,12 +25,14 @@ class TopBar(QFrame):
         layout.setSpacing(0)
         self.setLayout(layout)
 
-class ChessVsFriend(QWidget):
+class ChessVsBot(QWidget):
     game :chess.Board
     ui_game :ChessGame
 
     _msgs :list[str]
     _move_history :list[str]
+    _stockfish :Stockfish
+    _calc_ai_move = Signal()
 
     def __init__(self):
         super().__init__()
@@ -55,6 +58,9 @@ class ChessVsFriend(QWidget):
         self.ui_game.msg_sent.connect(self.record_message)
         self._msgs = []
         self._move_history = []
+        self._stockfish = Stockfish()
+        self._stockfish.update_engine_parameters({'UCI_Chess960': True})
+        self._calc_ai_move.connect(self.move_bot)
 
     def make_move(self, move :chess.Move):
         self.game.push(move)
@@ -62,8 +68,27 @@ class ChessVsFriend(QWidget):
         self._move_history.append(move.uci())
         self.ui_game.set_move_history(self._move_history)
         if self.game.is_game_over():
+            print('its jover')
             self.finish_game(self.game.outcome())
             return
+        fen = chess.square_name(move.from_square) + chess.square_name(move.to_square)
+        self._stockfish.make_moves_from_current_position([fen])
+
+        self.ui_game.set_selectable(not self.ui_game.is_selectable())
+        selectable = self.ui_game.is_selectable()
+        if not selectable:
+            self._calc_ai_move.emit()
+
+    def move_bot(self):
+        move = self._stockfish.get_best_move_time(1000)
+        from_sqr = chess.parse_square(move[:2])
+        to_sqr = chess.parse_square(move[2:])
+
+        self.make_move(chess.Move(from_sqr, to_sqr))
+
+    def record_message(self, msg :str):
+        self._msgs.append(msg)
+        self.ui_game.set_messages(self._msgs)
 
     def finish_game(self, outcome :chess.Outcome):
         win = outcome.winner
@@ -75,10 +100,6 @@ class ChessVsFriend(QWidget):
         dialog.accepted.connect(self.exit)
         dialog.show()
         self.dialog = dialog
-
-    def record_message(self, msg :str):
-        self._msgs.append(msg)
-        self.ui_game.set_messages(self._msgs)
 
     def exit(self):
         from ui.screens import OfflineMenu

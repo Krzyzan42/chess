@@ -16,6 +16,7 @@ class Game(QObject):
     def __init__(self, connection :ClientConnection):
         super().__init__()
         self._conn = connection
+        self.game = None
 
     def msg_recieved(self, msg :Message):
         processors = {

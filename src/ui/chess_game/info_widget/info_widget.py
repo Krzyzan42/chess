@@ -25,6 +25,7 @@ class InfoWidget(QWidget):
         white_img.setPixmap(QPixmap('resources/white_pawn.png'))
         white_lbl = PlayerLabel('White')
         white_lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.white_lbl = white_lbl
         white_layout.addWidget(white_img)
         white_layout.addWidget(white_lbl)
 
@@ -37,6 +38,7 @@ class InfoWidget(QWidget):
         black_img.setPixmap(QPixmap('resources/black_pawn.png'))
         black_lbl = PlayerLabel('Black')
         black_lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.black_lbl = black_lbl
         black_layout.addWidget(black_img)
         black_layout.addWidget(black_lbl)
 
@@ -45,3 +47,8 @@ class InfoWidget(QWidget):
         layout.addLayout(black_layout)
         self.setLayout(layout)
 
+    def set_black_name(self, name :str):
+        self.black_lbl.setText(name)
+    
+    def set_white_name(self, name :str):
+        self.white_lbl.setText(name)

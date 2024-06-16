@@ -6,7 +6,7 @@ from ui.menu_btn.MenuButton import MenuButton
 from ui import *
 from networking.client import Client
 
-class OnlineMenu(QWidget):
+class OnlineMenu(QFrame):
     client :Client
     
     def __init__(self):
@@ -98,10 +98,10 @@ class OnlineMenu(QWidget):
         ScreenManager.instance.set_screen(RegisterScreen())
 
     async def _logout_pressed(self):
-        dialog = LoadingDialog()
-        dialog.show()
+        self.dialog = LoadingDialog(self)
+        self.dialog.show()
         await self.client.auth.logout()
-        dialog.accept()
+        self.dialog.accept()
 
     async def _show_history(self):
         print(await self.client.game.request_history())

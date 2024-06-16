@@ -11,7 +11,7 @@ class ErrorDialog(QDialog):
     _title_lbl :QLabel
     _message_lbl :MsgLbl
 
-    def __init__(self, parent=None, msg :str = 'Message', title :str = 'Title'):
+    def __init__(self, parent=None, msg :str = 'Message', title :str = 'Error'):
         super().__init__(parent)
         self.setModal(True)
 

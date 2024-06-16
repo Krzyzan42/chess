@@ -100,6 +100,18 @@ class GameManager:
             for conn in game.spectators:
                 conn.send(GameUpdated(game.to_msg(None)))
 
+            if game.board.outcome():
+                print('its joever')
+                outcome = game.board.outcome()
+                reason = outcome.termination.name
+                reason = reason.capitalize()
+                reason = reason.replace('-', ' ')
+                
+                # reason = chess. outcome.termination.
+                end_msg = GameEnded(outcome.winner, reason)
+                self._send_everyone(game, end_msg)
+                self._games.remove(game)
+
             msg.owner.send(Response(msg.id, True))
 
     def _process_msg_request(self, msg :GameSendMsgRequest):
