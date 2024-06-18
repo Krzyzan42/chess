@@ -14,6 +14,7 @@ def main():
     ScreenManager.setup()
 
     window = Window()
+    window.setWindowTitle('Chess')
     ScreenManager.instance.set_screen(MainMenu())
     window.show()
     QtAsyncio.run()

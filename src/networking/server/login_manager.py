@@ -1,5 +1,6 @@
 from networking.common import *
 from networking.server.models import User
+import bcrypt
 
 # Keeps track of alive connections
 # Manages heartbeats and hello messages
@@ -43,8 +44,7 @@ class LoginManager:
     # TODO: Implement password hashing
     def process_login_msg(self, msg :LoginRequest):
         user = User.get_or_none(
-            username = msg.username,
-            password = msg.password
+            username = msg.username
         )
 
         if self.is_logged(msg.owner) or self.is_user_logged(user):
@@ -53,7 +53,7 @@ class LoginManager:
                 False,
                 'Already logged in'
             ))
-        elif not user:
+        elif not user or not bcrypt.checkpw(msg.password.encode(), user.password.encode()):
             msg.owner.send(Response(
                 msg.id,
                 False,
@@ -90,9 +90,10 @@ class LoginManager:
                 msg.id, False, 'Password has to be between 3 and 100 characters long'
             ))
         else:
+            hash_pass = bcrypt.hashpw(msg.password.encode('utf-8'), bcrypt.gensalt()).decode()
             user = User.create(
                 username = msg.username,
-                password = msg.password
+                password = hash_pass
             )
             self.logged_users[msg.owner] = user
             msg.owner.send(LoginInfo(True, msg.username, logged_in=True))
